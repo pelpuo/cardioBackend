@@ -1,5 +1,8 @@
 from datetime import datetime
+from json import JSONDecoder
+import json
 from pydoc import Doc
+from types import SimpleNamespace
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response, JSONResponse
 from sqlalchemy.orm import Session
@@ -17,6 +20,14 @@ collection = db.patients
 @router.get("/", status_code=200)
 async def get_patients(current_user: schemas.User = Depends(get_current_user)):
     arr = await collection.find().to_list(1000)
+    patients = []
+    for patient in arr:
+        patients.append(schemas.Patient(**patient))
+    return patients
+
+@router.get("/doctor/me", status_code=200)
+async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get_current_user)):
+    arr = await collection.find({'doctor_id': current_user.id}).to_list(1000)
     patients = []
     for patient in arr:
         patients.append(schemas.Patient(**patient))

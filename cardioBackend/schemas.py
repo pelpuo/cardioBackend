@@ -112,21 +112,34 @@ class UpdatePatient(BaseModel):
             }
         }
 
-class EgcValues:
-    sample: int
-    MLII: int
-    V5: int
+class EgcValues(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    reading_id: str
+    values: List[Dict] = []
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
         schema_extra = {
-            "example": {
-                "sample": 0,
-                "MLII": 800,
-                "V5": 850,
-            }
+            "reading_id": "123456",
+            "values": [
+                {
+                    "sample": 0,
+                    "MLII": 995,
+                    "V5": 1011
+                },
+                {
+                    "sample": 1,
+                    "MLII": 995,
+                    "V5": 1011
+                },
+                {
+                    "sample": 2,
+                    "MLII": 995,
+                    "V5": 1011
+                }
+                ]
         }
 
 
@@ -140,7 +153,7 @@ class Reading(BaseModel):
     speed: float
     limb: float
     chest: float
-    values: List[Dict] = []
+    values: List[Dict]
 
     class Config:
         allow_population_by_field_name = True
@@ -177,6 +190,7 @@ class Reading(BaseModel):
 
 class ShowReading(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    patient_id:str
     lead_type:str
     lead_placement:str
     hospital_name:str

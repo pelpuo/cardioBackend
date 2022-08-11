@@ -32,26 +32,32 @@ async def get_readings_by_patient_id(id, current_user: schemas.User = Depends(ge
 @router.get("/{id}", status_code=200)
 async def get_reading_by_id(id, current_user: schemas.User = Depends(get_current_user)):
     data = await collection.find_one({'_id': id})
+    ecg_values = await db.ecgValues.find_one({'reading_id': id})
     if data is None:
         raise HTTPException(status_code=404, detail='Reading not found.')
-    return schemas.Reading(**data)
+    return schemas.Reading(**data, values=ecg_values["values"])
 
 @router.post("/", status_code=201)
 async def add_reading(request: schemas.Reading, current_user: schemas.User = Depends(get_current_user)):
-    new_reading = schemas.Reading(
+    new_reading = schemas.ShowReading(
         patient_id =request.patient_id, 
         hospital_name =request.hospital_name, 
         lead_type =request.lead_type, 
         lead_placement = request.lead_placement, 
         speed = request.speed,
         limb = request.limb,
-        chest = request.chest,
-        values = request.values
+        chest = request.chest
         )
 
     new_reading = jsonable_encoder(new_reading)
 
-    await collection.insert_one(new_reading)
+    inserted_reading = await collection.insert_one(new_reading)
+    reading_id = inserted_reading.inserted_id
+
+    reading_vals = schemas.EgcValues(reading_id = reading_id, values = request.values)
+    reading_vals = jsonable_encoder(reading_vals)
+    await db.ecgValues.insert_one(reading_vals)
+    
     return new_reading
 
 @router.put("/{id}", status_code=200)
