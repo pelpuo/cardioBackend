@@ -1,16 +1,9 @@
-import imp
-from pydoc import Doc
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response, JSONResponse
 from sqlalchemy.orm import Session
 from cardioBackend import schemas
 from cardioBackend.oauth2 import get_current_user
-from cardioBackend.schemas import PyObjectId
 from cardioBackend.database import db
-from cardioBackend.hashing import Hash
-from bson import ObjectId
-from typing import List
-from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(prefix="/user", tags=["user"])
 collection = db.users
