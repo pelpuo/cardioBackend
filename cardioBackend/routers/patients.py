@@ -19,7 +19,7 @@ collection = db.patients
 
 @router.get("/", status_code=200)
 async def get_patients(current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN:
+    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find().to_list(1000)
     patients = []
@@ -39,7 +39,7 @@ async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get
 
 @router.get("/doctor/{id}", status_code=200)
 async def get_patients_by_doctor_id(id, current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN:
+    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find({'doctor_id': id}).to_list(1000)
     patients = []
@@ -56,7 +56,7 @@ async def get_patient_by_id(id, urrent_user: schemas.User = Depends(get_current_
 
 @router.post("/", status_code=201)
 async def add_patient(request: schemas.Patient, current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.TECHNICIAN:
+    if current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     new_patient = schemas.Patient(first_name=request.first_name, 
     last_name= request.last_name, 
@@ -73,7 +73,7 @@ async def add_patient(request: schemas.Patient, current_user: schemas.User = Dep
 
 @router.put("/{id}", status_code=200)
 async def edit_patient_details(id, patient: schemas.UpdatePatient, current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.TECHNICIAN:
+    if current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     
     patient = {k: v for k, v in patient.dict().items() if v is not None}
@@ -94,7 +94,7 @@ async def edit_patient_details(id, patient: schemas.UpdatePatient, current_user:
 
 @router.delete("/{id}", status_code=203)
 async def delete_patient(id, current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.TECHNICIAN:
+    if current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     delete_result = await collection.delete_one({"_id":id})
     if delete_result.deleted_count == 1:

@@ -33,6 +33,8 @@ async def get_user_info(current_user: schemas.User = Depends(get_current_user)):
 
 @router.get("/{id}", status_code=200)
 async def get_user_by_id(id, current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.ADMIN or current_user.id != id:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     data = await collection.find_one({'_id': id})
     if data is None:
         raise HTTPException(status_code=404, detail='Oops! User not found.')
