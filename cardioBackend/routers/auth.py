@@ -20,13 +20,19 @@ async def login(request:OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Incorrect password")
 
-    access_token = authToken.create_access_token(data={"id": user["_id"], "sub": user["email_address"], "role": user["role"]})
+    access_token = authToken.create_access_token(data={
+        "id": user["_id"], 
+        "sub": user["email_address"], 
+        "role": user["role"], 
+        "is_verified": user["is_verified"]
+        })
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/register", status_code=201)
 async def register_user(request: schemas.User):
-    new_user = schemas.User(first_name=request.first_name, 
+    new_user = schemas.User(
+    first_name=request.first_name, 
     last_name= request.last_name, 
     email_address= request.email_address,
     password= Hash.bcrypt(request.password))

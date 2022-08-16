@@ -5,7 +5,7 @@ from bson import ObjectId
 
 class Roles:
     DOCTOR = "doctor"
-    TECHNICIAN = "technicial"
+    TECHNICIAN = "technician"
     ADMIN = "admin"
 
 class PyObjectId(ObjectId):
@@ -30,7 +30,7 @@ class User(BaseModel):
     last_name:str
     email_address:str
     password:str
-    isVerified: bool = False
+    is_verified: bool = False
     role: str = Roles.DOCTOR
 
     class Config:
@@ -230,3 +230,4 @@ class TokenData(BaseModel):
     id: str
     email: Optional[str] = None
     role: str = None
+    is_verified: bool = False

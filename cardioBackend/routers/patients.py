@@ -8,7 +8,7 @@ from fastapi.responses import Response, JSONResponse
 from sqlalchemy.orm import Session
 from cardioBackend import schemas
 from cardioBackend.oauth2 import get_current_user
-from cardioBackend.schemas import PyObjectId
+from cardioBackend.schemas import PyObjectId, Roles
 from cardioBackend.database import db
 from bson import ObjectId
 from typing import List
@@ -19,6 +19,8 @@ collection = db.patients
 
 @router.get("/", status_code=200)
 async def get_patients(current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find().to_list(1000)
     patients = []
     for patient in arr:
@@ -27,6 +29,8 @@ async def get_patients(current_user: schemas.User = Depends(get_current_user)):
 
 @router.get("/doctor/me", status_code=200)
 async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.DOCTOR:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find({'doctor_id': current_user.id}).to_list(1000)
     patients = []
     for patient in arr:
@@ -35,6 +39,8 @@ async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get
 
 @router.get("/doctor/{id}", status_code=200)
 async def get_patients_by_doctor_id(id, current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find({'doctor_id': id}).to_list(1000)
     patients = []
     for patient in arr:
@@ -50,6 +56,8 @@ async def get_patient_by_id(id, urrent_user: schemas.User = Depends(get_current_
 
 @router.post("/", status_code=201)
 async def add_patient(request: schemas.Patient, current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.TECHNICIAN:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     new_patient = schemas.Patient(first_name=request.first_name, 
     last_name= request.last_name, 
     email_address= request.email_address,
@@ -65,6 +73,9 @@ async def add_patient(request: schemas.Patient, current_user: schemas.User = Dep
 
 @router.put("/{id}", status_code=200)
 async def edit_patient_details(id, patient: schemas.UpdatePatient, current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.TECHNICIAN:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
+    
     patient = {k: v for k, v in patient.dict().items() if v is not None}
 
     if len(patient) >= 1:
@@ -83,6 +94,8 @@ async def edit_patient_details(id, patient: schemas.UpdatePatient, current_user:
 
 @router.delete("/{id}", status_code=203)
 async def delete_patient(id, current_user: schemas.User = Depends(get_current_user)):
+    if current_user.role != Roles.TECHNICIAN:
+        raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     delete_result = await collection.delete_one({"_id":id})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=[])
