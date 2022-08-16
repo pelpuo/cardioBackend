@@ -29,7 +29,7 @@ async def get_patients(current_user: schemas.User = Depends(get_current_user)):
 
 @router.get("/doctor/me", status_code=200)
 async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.DOCTOR:
+    if current_user.role != Roles.DOCTOR or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find({'doctor_id': current_user.id}).to_list(1000)
     patients = []
