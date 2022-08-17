@@ -19,7 +19,7 @@ collection = db.patients
 
 @router.get("/", status_code=200)
 async def get_patients(current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
+    if (current_user.role != Roles.ADMIN and current_user.role != Roles.TECHNICIAN) or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find().to_list(1000)
     patients = []
@@ -39,7 +39,7 @@ async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get
 
 @router.get("/doctor/{id}", status_code=200)
 async def get_patients_by_doctor_id(id, current_user: schemas.User = Depends(get_current_user)):
-    if current_user.role != Roles.ADMIN or current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
+    if (current_user.role != Roles.ADMIN and current_user.role != Roles.TECHNICIAN) or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
     arr = await collection.find({'doctor_id': id}).to_list(1000)
     patients = []
