@@ -93,7 +93,7 @@ class UpdatePatient(BaseModel):
     first_name:str
     last_name:str
     email_address:str
-    date_of_birth: datetime
+    date_of_birth: str
     gender: str
     doctor_id: int 
 
@@ -154,6 +154,7 @@ class Reading(BaseModel):
     limb: float
     chest: float
     values: List[Dict]
+    prediction: str = ""
 
     class Config:
         allow_population_by_field_name = True
@@ -198,6 +199,7 @@ class ShowReading(BaseModel):
     speed: float
     limb: float
     chest: float
+    prediction: str = ""
     
     class Config:
         allow_population_by_field_name = True
@@ -212,6 +214,7 @@ class ShowReading(BaseModel):
                 "speed": 25,
                 "limb": 10,
                 "chest": 10,
+                "prediction":"normal"
             }
         }
 

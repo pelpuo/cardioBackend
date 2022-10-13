@@ -21,7 +21,7 @@ collection = db.patients
 async def get_patients(current_user: schemas.User = Depends(get_current_user)):
     if (current_user.role != Roles.ADMIN and current_user.role != Roles.TECHNICIAN) or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
-    arr = await collection.find().to_list(1000)
+    arr = await collection.find().sort("first_name").to_list(1000)
     patients = []
     for patient in arr:
         patients.append(schemas.Patient(**patient))
@@ -31,7 +31,7 @@ async def get_patients(current_user: schemas.User = Depends(get_current_user)):
 async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != Roles.DOCTOR or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
-    arr = await collection.find({'doctor_id': current_user.id}).to_list(1000)
+    arr = await collection.find({'doctor_id': current_user.id}).sort("first_name").to_list(1000)
     patients = []
     for patient in arr:
         patients.append(schemas.Patient(**patient))
@@ -41,7 +41,7 @@ async def get_patients_assigned_to_user(current_user: schemas.User = Depends(get
 async def get_patients_by_doctor_id(id, current_user: schemas.User = Depends(get_current_user)):
     if (current_user.role != Roles.ADMIN and current_user.role != Roles.TECHNICIAN) or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
-    arr = await collection.find({'doctor_id': id}).to_list(1000)
+    arr = await collection.find({'doctor_id': id}).sort("first_name").to_list(1000)
     patients = []
     for patient in arr:
         patients.append(schemas.Patient(**patient))

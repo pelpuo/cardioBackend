@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydoc import Doc
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response, JSONResponse
@@ -17,7 +18,7 @@ collection = db.readings
 async def get_readings(current_user: schemas.User = Depends(get_current_user)):
     if current_user.role != Roles.TECHNICIAN or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
-    arr = await collection.find().to_list(1000)
+    arr = await collection.find().sort("created_at", -1).to_list(1000)
     readings = []
     for reading in arr:
         readings.append(schemas.ShowReading(**reading))
@@ -27,7 +28,7 @@ async def get_readings(current_user: schemas.User = Depends(get_current_user)):
 async def get_readings_by_patient_id(id, current_user: schemas.User = Depends(get_current_user)):
     if (current_user.role != Roles.TECHNICIAN and current_user.role != Roles.DOCTOR) or current_user.is_verified == False:
         raise HTTPException(status_code=403, detail='Forbidden! Url is not permitted to this user.')
-    arr = await collection.find({'patient_id': id}).to_list(1000)
+    arr = await collection.find({'patient_id': id}).sort("created_at", -1).to_list(1000)
     readings = []
     for reading in arr:
         readings.append(schemas.ShowReading(**reading))
@@ -54,7 +55,9 @@ async def add_reading(request: schemas.Reading, current_user: schemas.User = Dep
         lead_placement = request.lead_placement, 
         speed = request.speed,
         limb = request.limb,
-        chest = request.chest
+        chest = request.chest,
+        prediction = request.prediction,
+        created_at=datetime.now()
         )
 
     new_reading = jsonable_encoder(new_reading)
